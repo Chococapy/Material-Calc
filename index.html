@@ -348,22 +348,33 @@
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         
         function updateMetaThemeColor(e) {
-            themeMeta.setAttribute('content', e.matches ? '#121216' : '#FAFAFF');
+            if (themeMeta) {
+                themeMeta.setAttribute('content', e.matches ? '#121216' : '#FAFAFF');
+            }
         }
-        darkModeMediaQuery.addListener(updateMetaThemeColor);
+        
+        // Uso de addEventListener (moderno) para evitar la advertencia de 'addListener' obsoleto
+        if (darkModeMediaQuery.addEventListener) {
+            darkModeMediaQuery.addEventListener('change', updateMetaThemeColor);
+        } else {
+            darkModeMediaQuery.addListener(updateMetaThemeColor); // Fallback
+        }
         updateMetaThemeColor(darkModeMediaQuery);
 
-        // Registro de SW para PWA offline
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fallo:', err));
+        // Registro de SW para PWA offline (Evita el error en consola si se abre como archivo local file://)
+        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('PWA en modo desarrollo local (sin SW):', err));
         }
 
         // Configuración Inicial de la Ventana
         window.addEventListener('load', () => {
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                // Al iniciar, le damos un tamaño holgado para que los círculos quepan perfectamente.
-                // NOTA: Eliminamos el evento 'resize' para no pelear con el usuario si decide cambiar el tamaño.
-                window.resizeTo(360, 620);
+                // Bloque try-catch para evitar errores si el navegador bloquea el resizeTo
+                try {
+                    window.resizeTo(360, 620);
+                } catch(e) {
+                    // Se ignora silenciosamente si no hay permisos
+                }
             }
         });
 
