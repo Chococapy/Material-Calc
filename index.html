@@ -385,6 +385,29 @@
             });
         }
 
+        // --- NUEVO CÓDIGO: Forzar tamaño en modo ventana ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Verifica si estamos en modo PWA instalada (no en una pestaña normal)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            
+            if (isStandalone) {
+                // Forzar el tamaño de la ventana a 360px de ancho y 580px de alto
+                const width = 360;
+                const height = 580;
+                
+                window.resizeTo(width, height);
+
+                // Opcional: Impedir que el usuario la estire infinitamente (forzar tamaño fijo)
+                window.addEventListener('resize', () => {
+                    // Solo forzamos el ancho para que Chrome OS pueda gestionar la altura automáticamente si abre el panel científico
+                    if (window.innerWidth > 400 || window.innerWidth < 320) {
+                       window.resizeTo(width, window.innerHeight); 
+                    }
+                });
+            }
+        });
+        // ----------------------------------------------------
+
         let currentExp = '';
         let lastResult = '';
         let needsReset = false;
